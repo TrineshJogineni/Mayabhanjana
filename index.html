@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Māyābhañjana: Royal Chowka Bhara</title>
+
+    <!-- Baahubali-Style Carved Typography -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700;900&family=Cinzel:wght@600;700;800&family=Rozha+One&display=swap"
+        rel="stylesheet">
+    <link rel="stylesheet" href="style.css" />
+
+    <!-- Three.js + OrbitControls -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+</head>
+
+<body>
+
+    <!-- WebGL 3D World Canvas -->
+    <canvas id="webgl-canvas"></canvas>
+
+    <!-- SCREEN 1: GLOWING ORANGE BAAHUBALI INTRO SCREEN -->
+    <div id="intro-screen" class="screen-overlay active">
+        <canvas id="intro-embers-canvas"></canvas>
+        <div class="intro-box">
+            <div class="sub-flame-title">THE IMPERIAL WAR OF CHOWKA BHARA · SABHĀ PARVA</div>
+            <h1 class="baahubali-title">MĀYĀBHAÑJANA</h1>
+            <div class="title-divider">
+                <span class="diamond">◆</span>
+                <span class="line"></span>
+                <span class="diamond">◆</span>
+            </div>
+            <p class="intro-description">
+                Face King Shakuni of Gandhara across the sacred obsidian, gold, and walnut board.
+                Roll the sacred Pachikas, guard the Gadi, and conquer the central Ghar.
+            </p>
+            <button class="btn-baahubali" onclick="showRulesScreen()">
+                ENTER THE ROYAL SABHĀ
+            </button>
+        </div>
+    </div>
+
+    <!-- SCREEN 2: SCROLL-GATED SACRED CHOWKA BHARA RULES -->
+    <div id="rules-screen" class="screen-overlay">
+        <div class="parchment-frame">
+            <div class="parchment-top">
+                <h2 class="baahubali-heading">SACRED LAWS OF CHOWKA BHARA</h2>
+                <p class="sub-heading-text">Decreed in the Court of Hastinapura. Read to the bottom to unseal the match.
+                </p>
+            </div>
+
+            <div class="parchment-content" id="rules-scroll-area" onscroll="handleRulesScroll()">
+                <div class="rule-card">
+                    <h3>I. The Board &amp; Holy Sanctuaries (Gadi)</h3>
+                    <p>
+                        Played upon a <strong>5×5 grid of black obsidian, warm walnut, and inlaid gold</strong>.
+                        The four cardinal edges and the central <strong>Ghar</strong> are holy sanctuaries marked with
+                        <strong>'X'</strong>.
+                        Pieces stationed on an 'X' can never be captured. Multiple pawns on safe squares stand
+                        side-by-side without merging.
+                    </p>
+                </div>
+
+                <div class="rule-card">
+                    <h3>II. The Pachikas &amp; Sacred Throws</h3>
+                    <p>
+                        Two oblong stick dice (<em>Pachikas</em>) are cast simultaneously. Authentic Chowka Bhara
+                        outcomes:
+                    </p>
+                    <ul>
+                        <li><strong>Ekka (1):</strong> Advance 1 square.</li>
+                        <li><strong>Dugga (2):</strong> Advance 2 squares.</li>
+                        <li><strong>Tigga (3):</strong> Advance 3 squares.</li>
+                        <li><strong>Chowka (4):</strong> Advance 4 squares + <strong>EARN A BONUS ROLL!</strong></li>
+                        <li><strong>Ashta (8):</strong> Advance 8 squares + <strong>EARN A BONUS ROLL!</strong></li>
+                    </ul>
+                </div>
+
+                <div class="rule-card">
+                    <h3>III. The Dual-Circuit March</h3>
+                    <p>
+                        All 4 of your Emerald Gotis begin safe at your Southern Home Gadi.
+                        They march <strong>counter-clockwise along the 16 outer perimeter squares</strong>.
+                    </p>
+                </div>
+
+                <div class="rule-card">
+                    <h3>IV. The Mandatory "Vettu" (Capture)</h3>
+                    <p>
+                        Landing upon an unprotected Kaurava piece cuts it, sending it back to Shakuni's starting Gadi
+                        and granting you an immediate <strong>BONUS ROLL</strong>.
+                    </p>
+                    <p class="highlight-rule">
+                        <strong>CRITICAL LAW:</strong> You are strictly forbidden from entering the inner clockwise ring
+                        toward the Ghar until you have captured at least one enemy piece!
+                    </p>
+                </div>
+
+                <div class="rule-card">
+                    <h3>V. Victory in the Central Ghar</h3>
+                    <p>
+                        Once a capture is achieved, pawns ascend into the inner 8-square ring, moving
+                        <strong>clockwise</strong>, and enter the central <strong>Ghar</strong> by exact count.
+                        The first monarch to seat all 4 Gotis in the Ghar claims victory!
+                    </p>
+                </div>
+                <div class="scroll-end-flag">— YOU HAVE CONTEMPLATED THE LAWS OF KINGS —</div>
+            </div>
+
+            <div class="parchment-bottom">
+                <button id="btn-accept-rules" class="btn-baahubali" disabled onclick="enterGameSession()">
+                    SCROLL TO COMPLETE SACRED OATH
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- SCREEN 3: HIGH FIDELITY GAMEPLAY INTERFACE -->
+    <div id="game-ui" class="ui-stage hidden">
+
+        <!-- Shakuni Speech Cloud (Positioned above Shakuni in 3D View) -->
+        <div id="shakuni-dialogue-cloud" class="speech-bubble hidden">
+            <div class="tail"></div>
+            <p id="shakuni-dialogue-text"></p>
+        </div>
+
+        <!-- Top Command HUD -->
+        <div class="hud-top-bar">
+            <div class="hud-brand">
+                <h2 class="baahubali-title-sm">MĀYĀBHAÑJANA</h2>
+                <span id="turn-indicator" class="badge-player">YOUR TURN</span>
+            </div>
+
+            <!-- Vettu (Capture) Tracker -->
+            <div class="vettu-tracker">
+                <div class="vettu-row">
+                    <span>Pandava Kills:</span>
+                    <strong id="player-kill-badge" class="badge-locked">0 (LOCKED)</strong>
+                </div>
+                <div class="vettu-row">
+                    <span>Shakuni Kills:</span>
+                    <strong id="ai-kill-badge" class="badge-locked">0 (LOCKED)</strong>
+                </div>
+            </div>
+
+            <!-- Satya-Bala Gauge -->
+            <div class="satya-box">
+                <div class="satya-header">
+                    <span>Satya-Bala (Dharma)</span>
+                    <span id="satya-val">0 / 100</span>
+                </div>
+                <div class="satya-track">
+                    <div class="satya-fill" id="satya-progress"></div>
+                </div>
+            </div>
+
+            <!-- Shakuni Maya Status -->
+            <div class="maya-container">
+                <span class="maya-title">Shakuni's Maya</span>
+                <div class="maya-gems">
+                    <div class="gem active" id="maya-gem-1"></div>
+                    <div class="gem active" id="maya-gem-2"></div>
+                    <div class="gem active" id="maya-gem-3"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Left Camera View Selectors -->
+        <div class="hud-camera-dock">
+            <button class="cam-btn" title="Eye-Level Throne View" onclick="cameraViewThrone()">👁️</button>
+            <button class="cam-btn" title="Top-Down Tactical View" onclick="cameraViewTopDown()">📐</button>
+            <button class="cam-btn" title="Perspective Isometric View" onclick="cameraViewIsometric()">🎥</button>
+        </div>
+
+        <!-- Right Council Log Terminal -->
+        <div class="hud-chronicle-log">
+            <div class="chronicle-head">SABHĀ CHRONICLE</div>
+            <div class="chronicle-body" id="chronicle-stream"></div>
+        </div>
+
+        <!-- Bottom Action Dock -->
+        <div class="hud-action-dock">
+            <div class="throw-display">
+                <span class="label">PACHIKA THROW:</span>
+                <span id="throw-result-text" class="score">—</span>
+            </div>
+            <button id="btn-cast-pachikas" class="btn-baahubali-action" onclick="playerCastPachikas()">
+                🎲 CAST PACHIKAS
+                <small id="action-hint">Throw the 2 sacred sticks</small>
+            </button>
+            <button id="btn-break-maya" class="btn-baahubali-sub" onclick="dispelMayaToken()" disabled>
+                ⚡ SHATTER MAYA (30)
+                <small>Dispel 1 Loaded Token</small>
+            </button>
+        </div>
+    </div>
+
+    <!-- VICTORY / DEFEAT MODAL -->
+    <div id="endgame-screen" class="screen-overlay">
+        <div class="endgame-panel">
+            <h1 id="endgame-header" class="baahubali-heading">AWAKENING OF DHARMA</h1>
+            <p id="endgame-message"></p>
+            <button class="btn-baahubali" onclick="location.reload()">PLAY ANOTHER WAGER</button>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+
+</html>
